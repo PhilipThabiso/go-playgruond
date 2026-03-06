@@ -1,0 +1,10 @@
+xlsxFile1:
+  path: "data/file1"
+  sheet: "Sheet1"
+  col: 1
+
+xlsxFile2:
+  path: "data/file2"
+  sheet: "Sheet1"
+  col: 1 
+
