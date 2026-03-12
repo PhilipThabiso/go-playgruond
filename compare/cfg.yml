@@ -1,10 +1,10 @@
 xlsxFile1:
-  path: "data/file1"
-  sheet: "Sheet1"
+  path: "/home/philip/proj/go/go-playground/compare/data/file1.xlsx"
+  sheet: "Table 1"
   col: 1
 
 xlsxFile2:
-  path: "data/file2"
-  sheet: "Sheet1"
+  path: "/home/philip/proj/go/go-playground/compare/data/file2.xlsx"
+  sheet: "Table 1"
   col: 1 
 

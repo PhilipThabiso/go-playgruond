@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/PhilipThabiso/go-playground/compare"
 )
 
 func main() {
-	compare.InitCompare()
+	if err := compare.InitCompare(); err != nil {
+		fmt.Printf("%w", err)
+	}
 }

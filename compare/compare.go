@@ -5,22 +5,23 @@ import (
 	"log"
 	"os"
 
+	"github.com/xuri/excelize/v2"
 	"gopkg.in/yaml.v3"
 )
 
 var cfgPath = "compare/cfg.yml"
 
-type XlsxFile struct {
+type XlsxCfg struct {
 	Path  string `yaml:"path"`
 	Sheet string `yaml:"sheet"`
 	Col   int    `yaml:"col"`
 }
 
 type XlsxFiles struct {
-	files map[string]XlsxFile `yaml:",inline"`
+	files map[string]XlsxCfg `yaml:",inline"`
 }
 
-func unmarshalXlsx(filePath string) (XlsxFiles, error) {
+func unmarshalCfg(filePath string) (XlsxFiles, error) {
 	var files XlsxFiles
 
 	data, err := os.ReadFile(filePath)
@@ -35,14 +36,58 @@ func unmarshalXlsx(filePath string) (XlsxFiles, error) {
 	return files, err
 }
 
-func InitCompare() {
-	cfg, err := unmarshalXlsx(cfgPath)
+func getXlsxColData(xlsxCfg XlsxCfg) ([]string, error) {
+	f, err := excelize.OpenFile(xlsxCfg.Path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to open file %s: %w", xlsxCfg.Path, err)
+	}
+	defer f.Close()
+
+	rows, err := f.GetRows(xlsxCfg.Sheet)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get rows from sheet %s: %w", xlsxCfg.Sheet, err)
+	}
+	var columnData []string
+	for _, row := range rows {
+		if len(row) > xlsxCfg.Col {
+			columnData = append(columnData, row[xlsxCfg.Col])
+		}
+	}
+	return columnData, err
+}
+
+func InitCompare() error {
+	cfg, err := unmarshalCfg(cfgPath)
+	if err != nil {
+		return err
 	}
 	fmt.Printf("%+v\n", cfg.files)
+
+	file1, err := getXlsxColData(cfg.files["xlsxFile1"])
+	if err != nil {
+		return err
+	}
+
+	file2, err := getXlsxColData(cfg.files["xlsxFile2"])
+	if err != nil {
+		return err
+	}
+
+	limit := 10
+	if len(file1) < limit {
+		limit = len(file1)
+	}
+	fmt.Println(file1[:limit])
+
+	if len(file2) < limit {
+		limit = len(file2)
+	}
+
+	return nil
 }
 
 func main() {
-	InitCompare()
+	if err := InitCompare(); err != nil {
+		log.Fatal(err)
+	}
 }
