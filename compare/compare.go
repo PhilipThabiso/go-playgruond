@@ -11,14 +11,31 @@ import (
 
 var cfgPath = "compare/cfg.yml"
 
-type XlsxCfg struct {
+type file struct {
+	Type string `yaml:"type"`
+}
+type FileCfg interface {
+	GetType() string
+}
+
+func (file xmlCfg) GetType() string  { return file.Type }
+func (file xlsxCfg) GetType() string { return file.Type }
+
+type xmlCfg struct {
+	Type    string `yaml:"type"`
+	Path    string `yaml:"path"`
+	Keyword string `yaml:"keyword"`
+}
+
+type xlsxCfg struct {
+	Type  string `yaml:"type"`
 	Path  string `yaml:"path"`
 	Sheet string `yaml:"sheet"`
 	Col   int    `yaml:"col"`
 }
 
 type XlsxFiles struct {
-	files map[string]XlsxCfg `yaml:",inline"`
+	files map[string]xlsxCfg `yaml:",inline"`
 }
 
 func unmarshalCfg(filePath string) (XlsxFiles, error) {
@@ -36,7 +53,7 @@ func unmarshalCfg(filePath string) (XlsxFiles, error) {
 	return files, err
 }
 
-func getXlsxColData(xlsxCfg XlsxCfg) ([]string, error) {
+func getXlsxColData(xlsxCfg xlsxCfg) ([]string, error) {
 	f, err := excelize.OpenFile(xlsxCfg.Path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open file %s: %w", xlsxCfg.Path, err)
@@ -82,6 +99,7 @@ func InitCompare() error {
 	if len(file2) < limit {
 		limit = len(file2)
 	}
+	fmt.Println(file2[:limit])
 
 	return nil
 }
